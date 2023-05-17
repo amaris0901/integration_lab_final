@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Box, Container, Fab } from '@mui/material';
 import Narbar from './Navbar';
@@ -6,33 +6,41 @@ import AuthModal from '../modal/auth/AuthModal';
 import CommentModal from '../modal/comment/CommentModal';
 import SnackBarMessage from '../SnackBarMessage';
 import GlobalContext from '../context/GlobalContext';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { useMemo } from 'react';
+import {QueryClientProvider} from 'react-query';
+import { QueryClient } from 'react-query';
+
 const Layout = () => {
   const [openLoginModal, setOpenLoginModal] = useState(false);
   const [openCommentModal, setOpenCommentModal] = useState(false);
-  const [status, setStatus] = useState();
+  
   const handleOpen = () => setOpenLoginModal(true);
   const handleClose = () => setOpenLoginModal(false);
 
   const handleCommentOpen = () => setOpenCommentModal(true);
   const handleCommentClose = () => setOpenCommentModal(false);
-  const [user, setUser] = useState();
-  const queryCLient= new(QueryClient);
+  
   const generatekey = () => {
     return Math.random();
   };
-  const globalContextValue=useMemo(()=>{
-    return{
+  const [status, setStatus] = useState();
+  const [user, setUser] = useState();
+  const [comments, setComments] = useState([]);
+  const queryClient = new QueryClient();
+    
+  const globalContextValue = useMemo(() => {
+    return {
       user,
+      comments,
       setUser,
       setStatus,
+      setComments,
     };
-  },[user]);
+  }, [user, comments, setComments]);
+  
   return (
     <GlobalContext.Provider value={globalContextValue}>
-        <QueryClientProvider client={queryCLient}>
-        <Box
+      <QueryClientProvider client={queryClient}>
+      <Box
       sx={{
         minHeight: '100vh',
         background: 'linear-gradient(45deg,#FFFEE0, #FFC8DD, #C2D3FF, #D7FFF5)',
@@ -75,8 +83,9 @@ const Layout = () => {
         <SnackBarMessage key={generatekey()} open={status.open} severity={status.severity} message={status.msg} />
       ) : null}
     </Box>
-        </QueryClientProvider>
-    </GlobalContext.Provider>
+      </QueryClientProvider>
+  </GlobalContext.Provider>
+    
   );
 };
 
